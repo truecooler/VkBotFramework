@@ -28,7 +28,7 @@ static void Main(string[] args)
 	/*регистрируем шаблон {регулярное выражение,случайная фраза из списка}*/
 	bot.RegisterPhraseTemplate("ты кто", new List<string>() {"меня зовут мишутка","вы о ком","не говори так со мной","а ты кто?"}); 
 	
-	/*регистрируем шаблон {регулярное выражение, user specified callback}
+	/*регистрируем шаблон {регулярное выражение, user specified callback}*/
 	bot.RegisterPhraseTemplate("колобок", (msg) =>
 	{
 		Console.WriteLine($"кто-то написал {msg.Text}, я могу регировать на эту фразу так, как я хочу! system(\"reboot\")");
