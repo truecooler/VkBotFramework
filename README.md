@@ -51,6 +51,10 @@ static void Main(string[] args)
 - [ ] Сделать тесты
 - [ ] Сделать библиотеку пригодной для создания бота пользователя(без группы)
 
+## Зависимости
+
+* [VkNet](https://github.com/vknet/vk) - взаимодействие с Api ВКонтакте.
+
 ## Built With
 
 * [VisualStudio](http://visualstudio.com)
