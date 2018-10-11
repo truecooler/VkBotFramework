@@ -11,35 +11,35 @@
 ### Example
 Использование крайне простое:
 
-```
+```c#
 static void Main(string[] args)
-  {
-  ...
+	{
+  	...
 	VkBot bot = new VkBot(settings.AccessToken, settings.GroupId);
 	/*подписываемся на событие о входящем сообщении*/
-  bot.OnMessageReceived += MessageReceivedTest; 
+	bot.OnMessageReceived += MessageReceivedTest; 
 	
-  /*подписываемся на событие об изменении в группе*/
-  bot.OnGroupUpdateReceived += UpdateReceivedTest; 
+	/*подписываемся на событие об изменении в группе*/
+	bot.OnGroupUpdateReceived += UpdateReceivedTest; 
   
 	/*регистрируем шаблон {регулярное выражение,ответ бота}*/
-  bot.RegisterPhraseTemplate("привет", "на привет всегда отвечаю кусь"); 
+	bot.RegisterPhraseTemplate("привет", "на привет всегда отвечаю кусь"); 
 	
-  /*регистрируем шаблон {регулярное выражение,случайная фраза из списка}*/
-  bot.RegisterPhraseTemplate("ты кто", new List<string>() {"меня зовут мишутка","вы о ком","не говори так со мной","а ты кто?"}  ); 
+	/*регистрируем шаблон {регулярное выражение,случайная фраза из списка}*/
+	bot.RegisterPhraseTemplate("ты кто", new List<string>() {"меня зовут мишутка","вы о ком","не говори так со мной","а ты кто?"}); 
 	
-  /*регистрируем шаблон {регулярное выражение, user specified callback}
-  bot.RegisterPhraseTemplate("колобок", (msg) =>
+	/*регистрируем шаблон {регулярное выражение, user specified callback}
+	bot.RegisterPhraseTemplate("колобок", (msg) =>
 	{
 		Console.WriteLine($"кто-то написал {msg.Text}, я могу регировать на эту фразу так, как я хочу! system(\"reboot\")");
 	});
-  /*запускаем бота с блокировкой текущего потока...*/
+	/*запускаем бота с блокировкой текущего потока...*/
 	bot.Start();
-  ...
+  	...
   }
         
 ```
-
+К библиотеке прилагается пример, с которым вы можете ознакомиться [тут](https://github.com/truecooler/VkBotFramework/blob/master/VkBotExample/Program.cs)
 ## Built With
 
 * [VisualStudio](http://visualstudio.com)
