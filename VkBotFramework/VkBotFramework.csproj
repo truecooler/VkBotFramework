@@ -4,4 +4,8 @@
     <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="VkNet" Version="1.39.0-127" />
+  </ItemGroup>
+
 </Project>
