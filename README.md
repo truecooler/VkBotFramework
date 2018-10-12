@@ -36,6 +36,7 @@ bot.RegisterPhraseTemplate("колобок", (msg) =>
 {
 	Console.WriteLine($"кто-то написал {msg.Text}, я могу регировать на эту фразу так, как я хочу! system(\"reboot\")");
 });
+
 /*запускаем бота с блокировкой текущего потока...*/
 bot.Start();
         
