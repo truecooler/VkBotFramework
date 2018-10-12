@@ -60,7 +60,7 @@ namespace VkBotExample
 			bot.OnMessageReceived += MessageReceivedTest;
 			bot.OnGroupUpdateReceived += UpdateReceivedTest;
 			bot.RegisterPhraseTemplate("привет", "на привет всегда отвечаю кусь");
-			bot.RegisterPhraseTemplate("ты кто", new List<string>() {"кавоо бля","вы о ком","не говори так","а ты кто?" }  );
+			bot.RegisterPhraseTemplate("ты кто", new List<string>() {"меня зовут мишутка","вы о ком","не говори так","а ты кто?" }  );
 			bot.RegisterPhraseTemplate("колобок", (msg) =>
 			{
 				Console.WriteLine($"кто-то написал {msg.Text}, я могу регировать на эту фразу так, как я хочу! system(\"reboot\")");

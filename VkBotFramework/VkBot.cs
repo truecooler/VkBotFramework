@@ -76,7 +76,7 @@ namespace VkBotFramework
 		{
 			if (this.GroupId == 0) this.ResolveGroupId();
 			PollSettings = Api.Groups.GetLongPollServer(this.GroupId);
-			Console.WriteLine($"LongPoolSettings updated. ts: {PollSettings.Pts.Value}");
+			Console.WriteLine($"LongPoolSettings updated. ts: {PollSettings.Ts}");
 		}
 
 		class PhraseTemplate
