@@ -19,10 +19,10 @@
 
 ```c#
 VkBot bot = new VkBot(settings.AccessToken, settings.GroupUrl);
-/*подписываемся на событие о входящем сообщении*/
+/*подписываемся на событие о входящем сообщении, в которое передается экземпляр сообщения*/
 bot.OnMessageReceived += MessageReceivedTest; 
 
-/*подписываемся на событие об изменении в группе*/
+/*подписываемся на событие об изменении в группе, в которое передается экземпляр события в группе*/
 bot.OnGroupUpdateReceived += UpdateReceivedTest; 
 
 /*регистрируем шаблон {регулярное выражение,ответ бота}*/
@@ -41,7 +41,7 @@ bot.RegisterPhraseTemplate("колобок", (msg) =>
 bot.Start();
         
 ```
-К библиотеке прилагается пример, с которым вы можете ознакомиться [тут](https://github.com/truecooler/VkBotFramework/blob/master/VkBotExample/Program.cs)
+С полным примером можно ознакомиться [тут](https://github.com/truecooler/VkBotFramework/blob/master/VkBotExample/Program.cs)
 
 ## TODOs
 - [x] Сделать подписки на события о приходе сообщения/обновления в группе
