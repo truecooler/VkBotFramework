@@ -6,6 +6,7 @@ using System.Text.RegularExpressions;
 
 using VkNet;
 using VkNet.Enums.Filters;
+using VkNet.Enums;
 using VkNet.Model.RequestParams;
 using VkNet.Model;
 using VkNet.Exception;
@@ -46,9 +47,10 @@ namespace VkBotFramework
 		public VkApi Api = null;
 		public LongPollServerResponse PollSettings = null;
 
-		public VkBot(string accessToken, ulong groupId)
+		public VkBot(string accessToken, string groupUrl)
 		{
-			this.GroupId = groupId;
+
+			this.GroupUrl = groupUrl;
 			Api = new VkApi();
 			PhraseTemplates = new List<PhraseTemplate>();
 			Api.Authorize(new ApiAuthParams
@@ -58,13 +60,23 @@ namespace VkBotFramework
 			Api.RestClient.Timeout = TimeSpan.FromSeconds(30);
 		}
 
-		ulong GroupId = 0;
-		
-		private VkBot SetupLongPoll()
+		public ulong GroupId = 0;
+		public string GroupUrl = string.Empty;
+
+		private void ResolveGroupId()
 		{
+			this.GroupUrl = Regex.Replace(this.GroupUrl, ".*/", "");
+			VkObject result = this.Api.Utils.ResolveScreenName(this.GroupUrl);
+			if (result.Type != VkObjectType.Group) throw new VkApiException("GroupUrl не указывает на группу.");
+			this.GroupId = (ulong)result.Id;
+			Console.WriteLine($"GroupId resolved. id: {this.GroupId}");
+		}
+		
+		private void SetupLongPoll()
+		{
+			if (this.GroupId == 0) this.ResolveGroupId();
 			PollSettings = Api.Groups.GetLongPollServer(this.GroupId);
-			Console.WriteLine("LongPoolSettings updated.");
-			return this;
+			Console.WriteLine($"LongPoolSettings updated. ts: {PollSettings.Pts.Value}");
 		}
 
 		class PhraseTemplate

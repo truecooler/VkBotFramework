@@ -14,7 +14,7 @@ namespace VkBotExample
 			{
 				Settings settings = new Settings();
 				settings.AccessToken = "put_your_vk_group_token_here";
-				settings.GroupId = 0;
+				settings.GroupUrl = "put_your_group_url_here";
 				File.WriteAllText(Settings.Filename, JsonConvert.SerializeObject(settings));
 			}
 			public static Settings Load()
@@ -28,7 +28,7 @@ namespace VkBotExample
 
 			public static string Filename = "./VkBotSettings.json";
 			public string AccessToken;
-			public ulong GroupId;
+			public string GroupUrl;
 		}
 
 
@@ -54,8 +54,9 @@ namespace VkBotExample
 				Console.ReadLine();
 				return;
 			}
+
 			Console.WriteLine("Настройки загружены.");
-			VkBot bot = new VkBot(settings.AccessToken, settings.GroupId);
+			VkBot bot = new VkBot(settings.AccessToken, settings.GroupUrl);
 			bot.OnMessageReceived += MessageReceivedTest;
 			bot.OnGroupUpdateReceived += UpdateReceivedTest;
 			bot.RegisterPhraseTemplate("привет", "на привет всегда отвечаю кусь");
