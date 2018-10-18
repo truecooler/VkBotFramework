@@ -52,6 +52,7 @@ namespace VkBotFramework
 
 			this.GroupUrl = groupUrl;
 			Api = new VkApi();
+			Api.RequestsPerSecond = 20;//лимит для группового access token
 			PhraseTemplates = new List<PhraseTemplate>();
 			Api.Authorize(new ApiAuthParams
 			{
