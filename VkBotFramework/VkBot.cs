@@ -20,27 +20,9 @@ using Newtonsoft.Json.Linq;
 
 namespace VkBotFramework
 {
-    public class VkBot
+	public partial class VkBot
     {
-		public class GroupUpdateReceivedEventArgs : EventArgs
-		{
-			public GroupUpdateReceivedEventArgs(GroupUpdate update)
-			{
-				this.update = update;
-			}
-			public GroupUpdate update;
-		}
-
-
-		public class MessageReceivedEventArgs : EventArgs
-		{
-			public MessageReceivedEventArgs(Message message)
-			{
-				this.message = message;
-			}
-			public Message message;
-		}
-
+		
 		public event EventHandler<GroupUpdateReceivedEventArgs> OnGroupUpdateReceived;
 		public event EventHandler<MessageReceivedEventArgs> OnMessageReceived;
 
@@ -78,37 +60,6 @@ namespace VkBotFramework
 			if (this.GroupId == 0) this.ResolveGroupId();
 			PollSettings = Api.Groups.GetLongPollServer(this.GroupId);
 			Console.WriteLine($"LongPoolSettings updated. ts: {PollSettings.Ts}");
-		}
-
-		class PhraseTemplate
-		{
-			public PhraseTemplate(string phraseRegexPattern, string answer, RegexOptions phraseRegexPatternOptions)
-			{
-				this.PhraseRegexPattern = phraseRegexPattern;
-				this.Answers = new List<string>();
-				this.Answers.Add(answer);
-				this.PhraseRegexPatternOptions = phraseRegexPatternOptions;
-			}
-
-
-			public PhraseTemplate(string phraseRegexPattern, List<string> answers, RegexOptions phraseRegexPatternOptions)
-			{
-				this.PhraseRegexPattern = phraseRegexPattern;
-				this.Answers = answers;
-				this.PhraseRegexPatternOptions = phraseRegexPatternOptions;
-			}
-
-			public PhraseTemplate(string phraseRegexPattern, Action<Message> callback, RegexOptions phraseRegexPatternOptions)
-			{
-				this.PhraseRegexPattern = phraseRegexPattern;
-				this.PhraseRegexPatternOptions = phraseRegexPatternOptions;
-				this.Callback = callback;
-			}
-
-			public string PhraseRegexPattern;
-			public List<string> Answers = null;
-			public RegexOptions PhraseRegexPatternOptions;
-			public Action<Message> Callback = null;
 		}
 
 		List<PhraseTemplate> PhraseTemplates;
@@ -215,21 +166,21 @@ namespace VkBotFramework
 
 		
 
-		public void Start()
+		public async Task StartAsync()
 		{
 			this.SetupLongPoll();
 			while (true)
 			{
 				try
 				{
-					BotsLongPollHistoryResponse longPollResponse = Api.Groups.GetBotsLongPollHistoryAsync(
+					BotsLongPollHistoryResponse longPollResponse = await Api.Groups.GetBotsLongPollHistoryAsync(
 						new BotsLongPollHistoryParams
 						{
 							Key = PollSettings.Key,
 							Server = PollSettings.Server,
 							Ts = PollSettings.Ts,
 							Wait = 25
-						}).ContinueWith(CheckLongPollResponseForErrorsAndHandle).GetAwaiter().GetResult();
+						}).ContinueWith(CheckLongPollResponseForErrorsAndHandle).ConfigureAwait(false);
 					if (longPollResponse == default(BotsLongPollHistoryResponse))
 						continue;
 					//Console.WriteLine(JsonConvert.SerializeObject(longPollResponse));
@@ -239,8 +190,14 @@ namespace VkBotFramework
 				catch (Exception ex)
 				{
 					Console.WriteLine(ex.Message);
+					throw;
 				}
 			}
+		}
+
+		public void Start()
+		{
+			this.StartAsync().GetAwaiter().GetResult();
 		}
 
 

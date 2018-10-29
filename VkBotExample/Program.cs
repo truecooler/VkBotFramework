@@ -65,7 +65,7 @@ namespace VkBotExample
 			{
 				Console.WriteLine($"кто-то написал {msg.Text}, я могу регировать на эту фразу так, как я хочу! system(\"reboot\")");
 			});
-			bot.Start();
+			bot.StartAsync().GetAwaiter().GetResult();
 			Console.ReadLine();
         }
     }
