@@ -14,6 +14,7 @@ using VkNet.Model;
 using VkNet.Exception;
 using VkNet.Model.GroupUpdate;
 using VkNet.Enums.SafetyEnums;
+using VkNet.Abstractions;
 
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -31,13 +32,13 @@ namespace VkBotFramework
 		public event EventHandler<GroupUpdateReceivedEventArgs> OnGroupUpdateReceived;
 		public event EventHandler<MessageReceivedEventArgs> OnMessageReceived;
 
-		public VkApi Api = null;
+		public IVkApi Api = null;
 		public LongPollServerResponse PollSettings = null;
 
 		public long GroupId = 0;
 		public string GroupUrl = string.Empty;
 
-		private ILogger<VkBot> Logger;
+		protected ILogger<VkBot> Logger;
 
 		List<PhraseTemplate> PhraseTemplates = new List<PhraseTemplate>();
 
@@ -68,18 +69,23 @@ namespace VkBotFramework
 			this.Setup(accessToken, groupUrl);
 		}
 
-		private void RegisterDefaultDependencies(IServiceCollection container)
+		protected void RegisterDefaultDependencies(IServiceCollection container)
 		{
 			if (container.All(x => x.ServiceType != typeof(ILogger<>)))
 			{
 				container.TryAddSingleton(typeof(ILogger<>), typeof(NullLogger<>));
 			}
+			if (container.All(x => x.ServiceType != typeof(IVkApi)))
+			{
+				var vkApiByDefault = new VkApi();
+				vkApiByDefault.RestClient.Timeout = TimeSpan.FromSeconds(30);
+				vkApiByDefault.RequestsPerSecond = 20;//лимит для группового access token
+				container.TryAddSingleton<IVkApi>(x => vkApiByDefault);
+			}
 		}
 
 		public void Setup(string accessToken, string groupUrl)
 		{
-			
-			Api.RequestsPerSecond = 20;//лимит для группового access token
 			Api.Authorize(new ApiAuthParams
 			{
 				AccessToken = accessToken
@@ -88,26 +94,27 @@ namespace VkBotFramework
 			this.GroupUrl = groupUrl;
 			this.GroupId = this.ResolveGroupId(groupUrl);
 
-			Api.RestClient.Timeout = TimeSpan.FromSeconds(30);
+			//Api.RestClient.Timeout = TimeSpan.FromSeconds(30);
+			
 			//ServicePointManager.UseNagleAlgorithm = false;
 			//ServicePointManager.Expect100Continue = false;
-			ServicePointManager.DefaultConnectionLimit = 20;
+			ServicePointManager.DefaultConnectionLimit = 20;//ограничение параллельных соединений для HttpClient
 			//ServicePointManager.EnableDnsRoundRobin = true;
 			//ServicePointManager.ReusePort = true;
 		}
 
-		private void SetupDependencies(IServiceCollection serviceCollection = null)
+		protected void SetupDependencies(IServiceCollection serviceCollection = null)
 		{
 			var container = serviceCollection ?? new ServiceCollection();
 			this.RegisterDefaultDependencies(container);
 			IServiceProvider serviceProvider = container.BuildServiceProvider();
 			this.Logger = serviceProvider.GetService<ILogger<VkBot>>();
-			Api = new VkApi(container);
+			this.Api = serviceProvider.GetService<IVkApi>();//new VkApi(container);
 			this.Logger.LogInformation("Все зависимости подключены.");
 		}
 
 
-		private long ResolveGroupId(string groupUrl)
+		protected long ResolveGroupId(string groupUrl)
 		{
 			VkObject result = this.Api.Utils.ResolveScreenName(Regex.Replace(groupUrl, ".*/", ""));
 			if (result.Type != VkObjectType.Group) throw new VkApiException("GroupUrl не указывает на группу.");
@@ -116,7 +123,7 @@ namespace VkBotFramework
 			return groupId;
 		}
 
-		private void SetupLongPoll()
+		protected void SetupLongPoll()
 		{
 			PollSettings = Api.Groups.GetLongPollServer((ulong)this.GroupId);
 			this.Logger.LogInformation($"VkBot: LongPoolSettings received. ts: {PollSettings.Ts}");
@@ -136,7 +143,7 @@ namespace VkBotFramework
 			PhraseTemplates.Add(new PhraseTemplate(regexPattern, callback, phraseRegexPatternOptions));
 		}
 
-		private void SearchPhraseAndHandle(Message message)
+		protected void SearchPhraseAndHandle(Message message)
 		{
 			foreach (PhraseTemplate pair in PhraseTemplates)
 			{
@@ -154,7 +161,7 @@ namespace VkBotFramework
 			}
 		}
 
-		private void ProcessLongPollEvents(BotsLongPollHistoryResponse pollResponse)
+		protected void ProcessLongPollEvents(BotsLongPollHistoryResponse pollResponse)
 		{
 
 			foreach (GroupUpdate update in pollResponse.Updates)
