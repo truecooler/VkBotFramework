@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Linq;
 using System.Net;
+using System.Collections.Concurrent;
 
 using VkNet;
 using VkNet.Enums.Filters;
@@ -23,57 +24,76 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+using VkBotFramework.Abstractions;
+using VkBotFramework.Models;
+using VkNet.Model.Keyboard;
 
 namespace VkBotFramework
 {
-	public partial class VkBot : IDisposable
+	public partial class VkBot : IVkBot
 	{
 
 		public event EventHandler<GroupUpdateReceivedEventArgs> OnGroupUpdateReceived;
 		public event EventHandler<MessageReceivedEventArgs> OnMessageReceived;
+		public event EventHandler OnBotStarted;
 
-		public IVkApi Api = null;
-		public LongPollServerResponse PollSettings = null;
+		public IVkApi Api { get; private set; }
+		public ILogger<VkBot> Logger { get; private set; }
+		public IRegexToActionTemplateManager TemplateManager { get; private set; }
 
-		public long GroupId = 0;
-		public string GroupUrl = string.Empty;
+		private LongPollServerResponse PollSettings { get; set; }
 
-		protected ILogger<VkBot> Logger;
+		public long GroupId { get; private set; }
+		public string GroupUrl { get; private set; }
 
-		List<PhraseTemplate> PhraseTemplates = new List<PhraseTemplate>();
+		private int LongPollTimeoutWaitSeconds { get; set; } = 25;
 
-		public VkBot(IServiceCollection serviceCollection = null)
+		
+
+		//public VkBot(IServiceCollection serviceCollection = null)
+		//{
+		//	this.SetupDependencies(serviceCollection);
+		//}
+		public VkBot(string accessToken, string groupUrl, IServiceCollection serviceCollection = null, int longPollTimeoutWaitSeconds = 25)// : this(serviceCollection)
 		{
 			this.SetupDependencies(serviceCollection);
-		}
-		public VkBot(string accessToken, string groupUrl, IServiceCollection serviceCollection = null) : this(serviceCollection)
-		{
-			this.Setup(accessToken, groupUrl);
+			this.Setup(accessToken, groupUrl, longPollTimeoutWaitSeconds);
+			
 		}
 
-		public VkBot(ILogger<VkBot> logger)
+		//public VkBot(ILogger<VkBot> logger)
+		//{
+		//	var container = new ServiceCollection();
+
+		//	if (logger != null)
+		//	{
+		//		container.TryAddSingleton(logger);
+		//	}
+		//	this.SetupDependencies(container);
+		//}
+
+		public VkBot(string accessToken, string groupUrl, ILogger<VkBot> logger, int longPollTimeoutWaitSeconds = 25)// : this(logger)
 		{
 			var container = new ServiceCollection();
-
 			if (logger != null)
 			{
 				container.TryAddSingleton(logger);
 			}
 			this.SetupDependencies(container);
 
-
+			this.Setup(accessToken, groupUrl, longPollTimeoutWaitSeconds);
+			
 		}
 
-		public VkBot(string accessToken, string groupUrl, ILogger<VkBot> logger) : this(logger)
-		{
-			this.Setup(accessToken, groupUrl);
-		}
-
-		protected void RegisterDefaultDependencies(IServiceCollection container)
+		private void RegisterDefaultDependencies(IServiceCollection container)
 		{
 			if (container.All(x => x.ServiceType != typeof(ILogger<>)))
 			{
 				container.TryAddSingleton(typeof(ILogger<>), typeof(NullLogger<>));
+			}
+			if (container.All(x => x.ServiceType != typeof(IRegexToActionTemplateManager)))
+			{
+				container.TryAddSingleton(typeof(IRegexToActionTemplateManager), typeof(RegexToActionTemplateManager));
 			}
 			if (container.All(x => x.ServiceType != typeof(IVkApi)))
 			{
@@ -84,13 +104,19 @@ namespace VkBotFramework
 			}
 		}
 
-		public void Setup(string accessToken, string groupUrl)
+		private void Setup(string accessToken, string groupUrl,int longPollTimeoutWaitSeconds=25)
 		{
+			if (string.IsNullOrEmpty(accessToken))
+				throw new ArgumentNullException(nameof(accessToken));
+			if (string.IsNullOrEmpty(groupUrl))
+				throw new ArgumentNullException(nameof(groupUrl));
+
 			Api.Authorize(new ApiAuthParams
 			{
 				AccessToken = accessToken
 			});
 
+			this.LongPollTimeoutWaitSeconds = longPollTimeoutWaitSeconds;
 			this.GroupUrl = groupUrl;
 			this.GroupId = this.ResolveGroupId(groupUrl);
 
@@ -103,18 +129,19 @@ namespace VkBotFramework
 			//ServicePointManager.ReusePort = true;
 		}
 
-		protected void SetupDependencies(IServiceCollection serviceCollection = null)
+		private void SetupDependencies(IServiceCollection serviceCollection = null)
 		{
 			var container = serviceCollection ?? new ServiceCollection();
 			this.RegisterDefaultDependencies(container);
 			IServiceProvider serviceProvider = container.BuildServiceProvider();
 			this.Logger = serviceProvider.GetService<ILogger<VkBot>>();
 			this.Api = serviceProvider.GetService<IVkApi>();//new VkApi(container);
+			this.TemplateManager = serviceProvider.GetService<IRegexToActionTemplateManager>();
 			this.Logger.LogInformation("Все зависимости подключены.");
 		}
 
 
-		protected long ResolveGroupId(string groupUrl)
+		private long ResolveGroupId(string groupUrl)
 		{
 			VkObject result = this.Api.Utils.ResolveScreenName(Regex.Replace(groupUrl, ".*/", ""));
 			if (result.Type != VkObjectType.Group) throw new VkApiException("GroupUrl не указывает на группу.");
@@ -123,45 +150,39 @@ namespace VkBotFramework
 			return groupId;
 		}
 
-		protected void SetupLongPoll()
+		private void SetupLongPoll()
 		{
 			PollSettings = Api.Groups.GetLongPollServer((ulong)this.GroupId);
 			this.Logger.LogInformation($"VkBot: LongPoolSettings received. ts: {PollSettings.Ts}");
 		}
 
-		public void RegisterPhraseTemplate(string regexPattern, string answer, RegexOptions phraseRegexPatternOptions = RegexOptions.IgnoreCase)
-		{
-			PhraseTemplates.Add(new PhraseTemplate(regexPattern, answer, phraseRegexPatternOptions));
-		}
-		public void RegisterPhraseTemplate(string regexPattern, List<string> answers, RegexOptions phraseRegexPatternOptions = RegexOptions.IgnoreCase)
-		{
-			PhraseTemplates.Add(new PhraseTemplate(regexPattern, answers, phraseRegexPatternOptions));
-		}
 
-		public void RegisterPhraseTemplate(string regexPattern, Action<Message> callback, RegexOptions phraseRegexPatternOptions = RegexOptions.IgnoreCase)
-		{
-			PhraseTemplates.Add(new PhraseTemplate(regexPattern, callback, phraseRegexPatternOptions));
-		}
 
-		protected void SearchPhraseAndHandle(Message message)
+		private void SearchTemplatesMatchingMessageAndHandle(Message message)
 		{
-			foreach (PhraseTemplate pair in PhraseTemplates)
+			var rand = new Random();
+			foreach (RegexToActionTemplate matchingTemplate in
+				this.TemplateManager.SearchTemplatesMatchingMessage(message))
 			{
-				Regex regex = new Regex(pair.PhraseRegexPattern, pair.PhraseRegexPatternOptions);
-				if (regex.IsMatch(message.Text))
+				if (matchingTemplate.Callback == null)
 				{
-
-					if (pair.Callback == null)
-						//TODO: сделать этот вызов асинхронным
-						Api.Messages.Send(new MessagesSendParams { Message = pair.Answers[new Random().Next(0, pair.Answers.Count)], PeerId = message.PeerId });
-					else
-						pair.Callback(message);
+					//TODO: make this call async
+					Api.Messages.Send(new MessagesSendParams
+					{
+						Message = matchingTemplate.GetRandomResponseMessage(),
+						PeerId = message.PeerId,
+						RandomId = rand.Next(1, Int32.MaxValue),
+						Keyboard = matchingTemplate.MessageKeyboard
+					});
 				}
-
+				else
+				{
+					matchingTemplate.Callback(this,message);
+				}
 			}
 		}
 
-		protected void ProcessLongPollEvents(BotsLongPollHistoryResponse pollResponse)
+		private void ProcessLongPollEvents(BotsLongPollHistoryResponse pollResponse)
 		{
 
 			foreach (GroupUpdate update in pollResponse.Updates)
@@ -170,13 +191,13 @@ namespace VkBotFramework
 				if (update.Type == GroupUpdateType.MessageNew)
 				{
 					OnMessageReceived?.Invoke(this, new MessageReceivedEventArgs(update.Message));
-					SearchPhraseAndHandle(update.Message);
+					this.SearchTemplatesMatchingMessageAndHandle(update.Message);
 				}
 
 			}
 		}
 
-		T CheckLongPollResponseForErrorsAndHandle<T>(Task<T> task)
+		private T CheckLongPollResponseForErrorsAndHandle<T>(Task<T> task)
 		{
 			if (task.IsFaulted)
 			{
@@ -225,7 +246,7 @@ namespace VkBotFramework
 				catch (Exception ex)
 				{
 					this.Logger.LogError(ex.Message);
-					throw ex;
+					throw;
 				}
 			}
 		}
@@ -235,6 +256,7 @@ namespace VkBotFramework
 		public async Task StartAsync()
 		{
 			this.SetupLongPoll();
+			this.OnBotStarted?.Invoke(this,null);
 			while (true)
 			{
 				try
@@ -245,7 +267,7 @@ namespace VkBotFramework
 							Key = PollSettings.Key,
 							Server = PollSettings.Server,
 							Ts = PollSettings.Ts,
-							Wait = 25
+							Wait = this.LongPollTimeoutWaitSeconds
 						}).ContinueWith(CheckLongPollResponseForErrorsAndHandle).ConfigureAwait(false);
 					if (longPollResponse == default(BotsLongPollHistoryResponse))
 						continue;
@@ -255,12 +277,13 @@ namespace VkBotFramework
 				}
 				catch (Exception ex)
 				{
-					this.Logger.LogError(ex.Message);
+					this.Logger.LogError(ex.Message + "\r\n" + ex.StackTrace);
 					throw;
 				}
 			}
 		}
 
+		//TODO: ask your teamlead for better solution
 		public void Start()
 		{
 			this.StartAsync().GetAwaiter().GetResult();

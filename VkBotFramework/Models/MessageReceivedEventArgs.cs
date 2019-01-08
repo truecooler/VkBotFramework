@@ -2,10 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 using VkNet.Model;
-namespace VkBotFramework
+namespace VkBotFramework.Models
 {
-	public partial class VkBot
-	{
+
 		public class MessageReceivedEventArgs : EventArgs
 		{
 			public MessageReceivedEventArgs(Message message)
@@ -14,5 +13,5 @@ namespace VkBotFramework
 			}
 			public Message message;
 		}
-	}
+
 }

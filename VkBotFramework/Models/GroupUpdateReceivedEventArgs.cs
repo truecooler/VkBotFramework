@@ -3,10 +3,9 @@ using System.Collections.Generic;
 using System.Text;
 using VkNet.Model.GroupUpdate;
 
-namespace VkBotFramework
+namespace VkBotFramework.Models
 {
-	public partial class VkBot
-	{
+
 		public class GroupUpdateReceivedEventArgs : EventArgs
 		{
 			public GroupUpdateReceivedEventArgs(GroupUpdate update)
@@ -15,5 +14,5 @@ namespace VkBotFramework
 			}
 			public GroupUpdate update;
 		}
-	}
+	
 }

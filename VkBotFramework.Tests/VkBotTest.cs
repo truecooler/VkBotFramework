@@ -23,33 +23,29 @@ namespace VkBotFramework.Tests
 			
 		}
 
-		//[Test]
-		//public void VkBot_CallConstructorWithNullDepency_ShouldHasAllDependencies()
-		//{
-		//	//var dl = new ServiceCollection();
-		//	//dl.AddSingleton<IVkApi, VkApi>();
-		//	var Bot = new VkBotTest();
-		//	Assert.That(Bot.Api, Is.Not.Null);
-		//	Assert.That(Bot.Logger, Is.Not.Null);
-
-		//}
 
 
 		[Test]
-		public void VkBot_CallConstructorWithDepency_ShouldHasAllDependencies()
+		public void Setup_PutMockThoughtDI_GetCorrectResolvedGroupId()
 		{
 			var dl = new ServiceCollection();
-			var vk = new Mock<IVkApi>();
-			vk.Setup(x => x.Authorize(It.IsAny<ApiAuthParams>()));
-			vk.Setup(x => x.RefreshToken(It.IsAny<Func<string>>()) );
-			vk.Setup(x => x.CallLongPoll(It.IsAny<string>(),It.IsAny<VkParameters>()));
-			dl.AddSingleton<IVkApi>(x => vk.Object);
-			var Bot = new VkBot();
-			vk.Verify();
-			//Assert.That(Bot.Api, Is.Not.Null);
-			//Assert.That(Bot.Logger, Is.Not.Null);
+			var mockRepo = new MockRepository(MockBehavior.Default);
+			var vkMock = mockRepo.Create<IVkApi>();
+			var utilsMock = mockRepo.Create<IUtilsCategory>();
+			vkMock.SetupGet(x => x.Utils).Returns(utilsMock.Object);
+
+			long assumeGroupId = 111222;
+			var resolveScreenNameResponse = new VkObject() { Type = VkNet.Enums.VkObjectType.Group, Id = assumeGroupId };
+			utilsMock.Setup(x => x.ResolveScreenName(It.IsAny<string>())).Returns(resolveScreenNameResponse);
+			dl.AddSingleton<IVkApi>(x => { return vkMock.Object; });
+			var Bot = new VkBot(dl);
+			Bot.Setup(accessToken:"test", groupUrl:"test");
+			mockRepo.VerifyAll() ;
+			Assert.That(Bot.GroupId, Is.EqualTo(assumeGroupId));
 
 		}
+
+
 
 
 
