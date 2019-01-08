@@ -48,17 +48,18 @@ namespace VkBotFramework
 
 		private int LongPollTimeoutWaitSeconds { get; set; } = 25;
 
-		
+
 
 		//public VkBot(IServiceCollection serviceCollection = null)
 		//{
 		//	this.SetupDependencies(serviceCollection);
 		//}
-		public VkBot(string accessToken, string groupUrl, IServiceCollection serviceCollection = null, int longPollTimeoutWaitSeconds = 25)// : this(serviceCollection)
+		public VkBot(string accessToken, string groupUrl, IServiceCollection serviceCollection = null,
+			int longPollTimeoutWaitSeconds = 25) // : this(serviceCollection)
 		{
 			this.SetupDependencies(serviceCollection);
 			this.Setup(accessToken, groupUrl, longPollTimeoutWaitSeconds);
-			
+
 		}
 
 		//public VkBot(ILogger<VkBot> logger)
@@ -72,17 +73,19 @@ namespace VkBotFramework
 		//	this.SetupDependencies(container);
 		//}
 
-		public VkBot(string accessToken, string groupUrl, ILogger<VkBot> logger, int longPollTimeoutWaitSeconds = 25)// : this(logger)
+		public VkBot(string accessToken, string groupUrl, ILogger<VkBot> logger,
+			int longPollTimeoutWaitSeconds = 25) // : this(logger)
 		{
 			var container = new ServiceCollection();
 			if (logger != null)
 			{
 				container.TryAddSingleton(logger);
 			}
+
 			this.SetupDependencies(container);
 
 			this.Setup(accessToken, groupUrl, longPollTimeoutWaitSeconds);
-			
+
 		}
 
 		private void RegisterDefaultDependencies(IServiceCollection container)
@@ -91,20 +94,22 @@ namespace VkBotFramework
 			{
 				container.TryAddSingleton(typeof(ILogger<>), typeof(NullLogger<>));
 			}
+
 			if (container.All(x => x.ServiceType != typeof(IRegexToActionTemplateManager)))
 			{
 				container.TryAddSingleton(typeof(IRegexToActionTemplateManager), typeof(RegexToActionTemplateManager));
 			}
+
 			if (container.All(x => x.ServiceType != typeof(IVkApi)))
 			{
 				var vkApiByDefault = new VkApi();
 				vkApiByDefault.RestClient.Timeout = TimeSpan.FromSeconds(30);
-				vkApiByDefault.RequestsPerSecond = 20;//лимит для группового access token
+				vkApiByDefault.RequestsPerSecond = 20; //лимит для группового access token
 				container.TryAddSingleton<IVkApi>(x => vkApiByDefault);
 			}
 		}
 
-		private void Setup(string accessToken, string groupUrl,int longPollTimeoutWaitSeconds=25)
+		private void Setup(string accessToken, string groupUrl, int longPollTimeoutWaitSeconds = 25)
 		{
 			if (string.IsNullOrEmpty(accessToken))
 				throw new ArgumentNullException(nameof(accessToken));
@@ -121,10 +126,10 @@ namespace VkBotFramework
 			this.GroupId = this.ResolveGroupId(groupUrl);
 
 			//Api.RestClient.Timeout = TimeSpan.FromSeconds(30);
-			
+
 			//ServicePointManager.UseNagleAlgorithm = false;
 			//ServicePointManager.Expect100Continue = false;
-			ServicePointManager.DefaultConnectionLimit = 20;//ограничение параллельных соединений для HttpClient
+			ServicePointManager.DefaultConnectionLimit = 20; //ограничение параллельных соединений для HttpClient
 			//ServicePointManager.EnableDnsRoundRobin = true;
 			//ServicePointManager.ReusePort = true;
 		}
@@ -135,7 +140,7 @@ namespace VkBotFramework
 			this.RegisterDefaultDependencies(container);
 			IServiceProvider serviceProvider = container.BuildServiceProvider();
 			this.Logger = serviceProvider.GetService<ILogger<VkBot>>();
-			this.Api = serviceProvider.GetService<IVkApi>();//new VkApi(container);
+			this.Api = serviceProvider.GetService<IVkApi>(); //new VkApi(container);
 			this.TemplateManager = serviceProvider.GetService<IRegexToActionTemplateManager>();
 			this.Logger.LogInformation("Все зависимости подключены.");
 		}
@@ -152,7 +157,7 @@ namespace VkBotFramework
 
 		private void SetupLongPoll()
 		{
-			PollSettings = Api.Groups.GetLongPollServer((ulong)this.GroupId);
+			PollSettings = Api.Groups.GetLongPollServer((ulong) this.GroupId);
 			this.Logger.LogInformation($"VkBot: LongPoolSettings received. ts: {PollSettings.Ts}");
 		}
 
@@ -177,7 +182,7 @@ namespace VkBotFramework
 				}
 				else
 				{
-					matchingTemplate.Callback(this,message);
+					matchingTemplate.Callback(this, message);
 				}
 			}
 		}
@@ -234,7 +239,8 @@ namespace VkBotFramework
 			}
 			else if (task.IsCanceled)
 			{
-				this.Logger.LogWarning("CheckLongPollResponseForErrorsAndHandle() : task.IsCanceled, possibly timeout reached");
+				this.Logger.LogWarning(
+					"CheckLongPollResponseForErrorsAndHandle() : task.IsCanceled, possibly timeout reached");
 				return default(T);
 			}
 			else
@@ -256,7 +262,7 @@ namespace VkBotFramework
 		public async Task StartAsync()
 		{
 			this.SetupLongPoll();
-			this.OnBotStarted?.Invoke(this,null);
+			this.OnBotStarted?.Invoke(this, null);
 			while (true)
 			{
 				try

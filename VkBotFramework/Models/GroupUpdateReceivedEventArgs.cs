@@ -6,13 +6,13 @@ using VkNet.Model.GroupUpdate;
 namespace VkBotFramework.Models
 {
 
-		public class GroupUpdateReceivedEventArgs : EventArgs
+	public class GroupUpdateReceivedEventArgs : EventArgs
+	{
+		public GroupUpdateReceivedEventArgs(GroupUpdate update)
 		{
-			public GroupUpdateReceivedEventArgs(GroupUpdate update)
-			{
-				this.update = update;
-			}
-			public GroupUpdate update;
+			this.Update = update;
 		}
-	
+
+		public GroupUpdate Update;
+	}
 }

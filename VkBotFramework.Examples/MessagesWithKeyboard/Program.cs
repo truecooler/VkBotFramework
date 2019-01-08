@@ -69,8 +69,8 @@ namespace MessagesWithKeyboard
 					RandomId = Environment.TickCount,
 					PeerId = eventArgs.PeerId,
 					Message = (userAnswer == validAnswer)
-						? "верный ответ!"
-						: $"неверно! верный ответ был: {validAnswer}, попробуйте еще раз",
+						? "верный ответ! держи печенюху"
+						: $"ответ {userAnswer} невернен! верный ответ был: {validAnswer}, попробуйте еще раз",
 					Keyboard = keyboard.Build()
 
 				});

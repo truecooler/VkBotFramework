@@ -17,12 +17,14 @@ namespace VkBotFramework.Examples
 			settings.GroupUrl = "put_your_group_url_here";
 			File.WriteAllText(ExampleSettings.Filename, JsonConvert.SerializeObject(settings));
 		}
+
 		public static ExampleSettings Load()
 		{
 			if (!File.Exists(ExampleSettings.Filename))
 			{
 				return null;
 			}
+
 			return JsonConvert.DeserializeObject<ExampleSettings>(File.ReadAllText(ExampleSettings.Filename));
 		}
 
@@ -32,12 +34,14 @@ namespace VkBotFramework.Examples
 
 			if ((settings = ExampleSettings.Load()) == null)
 			{
-				_Logger.LogWarning(@"Файл с настройками ExampleSettings.json не найден в VkBotFramework.Examples\ExampleSettings\bin. Будет создан файл настроек по-умолчанию в указанном месте.");
+				_Logger.LogWarning(
+					@"Файл с настройками ExampleSettings.json не найден в VkBotFramework.Examples\ExampleSettings\bin. Будет создан файл настроек по-умолчанию в указанном месте.");
 				_Logger.LogWarning("Занесите в него корректные параметры для вашего бота и запустите пример снова");
 				ExampleSettings.CreateDefaults();
 				Console.ReadLine();
 				Environment.Exit(0);
 			}
+
 			_Logger.LogInformation("Настройки загружены.");
 			return settings;
 		}
