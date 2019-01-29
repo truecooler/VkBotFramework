@@ -38,8 +38,7 @@ namespace VkBotFramework.Tests
 			var resolveScreenNameResponse = new VkObject() { Type = VkNet.Enums.VkObjectType.Group, Id = assumeGroupId };
 			utilsMock.Setup(x => x.ResolveScreenName(It.IsAny<string>())).Returns(resolveScreenNameResponse);
 			dl.AddSingleton<IVkApi>(x => { return vkMock.Object; });
-			var Bot = new VkBot(dl);
-			Bot.Setup(accessToken:"test", groupUrl:"test");
+			var Bot = new VkBot("test","test",dl);
 			mockRepo.VerifyAll() ;
 			Assert.That(Bot.GroupId, Is.EqualTo(assumeGroupId));
 

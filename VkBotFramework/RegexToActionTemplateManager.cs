@@ -13,7 +13,7 @@ namespace VkBotFramework
 {
 	public class RegexToActionTemplateManager : IRegexToActionTemplateManager
 	{
-		public ConcurrentBag<RegexToActionTemplate> RegexToActionTemplates = new ConcurrentBag<RegexToActionTemplate>();
+		public List<RegexToActionTemplate> RegexToActionTemplates = new List<RegexToActionTemplate>();
 
 		public void Register(string incomingMessageRegexPattern, string responseMessage,
 			MessageKeyboard messageKeyboard = null,

@@ -1,14 +1,23 @@
 ﻿using Microsoft.Extensions.Logging;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
 using VkBotFramework;
 using VkBotFramework.Examples;
 using VkNet.Enums.SafetyEnums;
 using VkNet.Model.Keyboard;
 using VkNet.Model.RequestParams;
+using VkNet.Utils;
 
 namespace MessagesWithKeyboard
 {
+
+	class PeerContext
+	{
+		public int ValidAnswer;
+	}
+
 	class Program
 	{
 		static void Main(string[] args)
@@ -20,19 +29,19 @@ namespace MessagesWithKeyboard
 
 			VkBot bot = new VkBot(settings.AccessToken, settings.GroupUrl, logger);
 
-			var isBotStarted = false;
+			//для поддержки сразу нескольких диалогов
+			var participatingPeers = new Dictionary<long, PeerContext>();
 
-			int validAnswer = 0;
+			bot.TemplateManager.Register("\\+матеша", "ну окей, вот тебе матеша");
 
-
-			bot.TemplateManager.Register("матеша", (sender, eventArgs) =>
+			bot.TemplateManager.Register("\\+матеша", (sender, eventArgs) =>
 			{
-				isBotStarted = true;
 				var rand = new Random();
 				var firstNum = rand.Next(1, 100);
 				var secondNum = rand.Next(1, 100);
-
-				validAnswer = firstNum + secondNum;
+				var validAnswer = firstNum + secondNum;
+				var peerContext = new PeerContext(){ValidAnswer = validAnswer };
+				participatingPeers.Add(eventArgs.PeerId.Value, peerContext);
 
 				int buttonsCount = 4;
 
@@ -41,9 +50,9 @@ namespace MessagesWithKeyboard
 				for (int i = 0; i < buttonsCount; i++)
 				{
 					if (i == validButtonIndex)
-						keyboard.AddButton((validAnswer).ToString(), i.ToString());
+						keyboard.AddButton((validAnswer).ToString(), "");
 					else
-						keyboard.AddButton(rand.Next(200).ToString(), i.ToString());
+						keyboard.AddButton(rand.Next(200).ToString(), "");
 				}
 
 				sender.Api.Messages.Send(new MessagesSendParams()
@@ -56,25 +65,30 @@ namespace MessagesWithKeyboard
 				});
 			});
 
-			bot.TemplateManager.Register("матеша", "ну окей, вот тебе матеша");
 
+			bot.TemplateManager.Register("-матеша", "ну окей, теперь не будет у вас этой кнопки",new KeyboardBuilder().SetOneTime().AddButton("пока","").Build());
 			bot.TemplateManager.Register(@"\d+$", (sender, eventArgs) =>
 			{
-				sender.Logger.LogInformation(eventArgs.Text);
-				if (!isBotStarted) return;
+				PeerContext peerContext;
+				if (!participatingPeers.TryGetValue(eventArgs.PeerId.Value,out peerContext)) return;
+
 				int userAnswer = int.Parse(Regex.Match(eventArgs.Text, @"\d+$").Value);
-				var keyboard = new KeyboardBuilder().AddButton("матеша", "1");
+
+				var keyboard = new KeyboardBuilder()
+					.AddButton("+матеша", "",KeyboardButtonColor.Positive)
+					.AddButton("-матеша","",KeyboardButtonColor.Negative);
+
 				sender.Api.Messages.Send(new MessagesSendParams()
 				{
 					RandomId = Environment.TickCount,
 					PeerId = eventArgs.PeerId,
-					Message = (userAnswer == validAnswer)
+					Message = (userAnswer == peerContext.ValidAnswer)
 						? "верный ответ! держи печенюху"
-						: $"ответ {userAnswer} невернен! верный ответ был: {validAnswer}, попробуйте еще раз",
+						: $"ответ {userAnswer} невернен! верный ответ был: {peerContext.ValidAnswer}, попробуйте еще раз",
 					Keyboard = keyboard.Build()
 
 				});
-				isBotStarted = false;
+				participatingPeers.Remove(eventArgs.PeerId.Value);
 			});
 			bot.Start();
 			bot.Dispose();
