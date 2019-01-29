@@ -1,4 +1,6 @@
 # VkBotFramework
+![VkBotFramework Logo](https://github.com/truecooler/VkBotFramework/raw/master/vkbotframework.png)
+
 Удобная, маленькая и кроссплатформенная библиотека для создания ботов в соц. сети ВКонтакте
 ## Getting Started
 Эти инструкция позволит вам просто и быстро сделать своего бота для вк.
