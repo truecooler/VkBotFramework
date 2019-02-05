@@ -197,7 +197,8 @@ namespace VkBotFramework
 
 			foreach (GroupUpdate update in pollResponse.Updates)
 			{
-				OnGroupUpdateReceived?.Invoke(this, new GroupUpdateReceivedEventArgs(update));
+				OnGroupUpdateReceived?.Invoke(this, new GroupUpdateReceivedEventArgs(update,
+					this.PeerContextManager.GlobalVars));
 				if (update.Type == GroupUpdateType.MessageNew)
 				{
 					long peerId = update.Message.PeerId.Value;
@@ -205,7 +206,7 @@ namespace VkBotFramework
 
 					if (!this.PeerContextManager.Peers.TryGetValue(peerId, out peerContext))
 					{
-						peerContext = new PeerContext(this.PeerContextManager.GlobalPeerContext);
+						peerContext = new PeerContext(this.PeerContextManager.GlobalVars);
 						this.PeerContextManager.Peers.Add(peerId, peerContext);
 					}
 
