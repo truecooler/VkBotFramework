@@ -1,14 +1,12 @@
 ﻿using System;
 using System.Threading.Tasks;
-using System.Net.Http;
-using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Linq;
 using System.Net;
-using System.Collections.Concurrent;
+
+
 
 using VkNet;
-using VkNet.Enums.Filters;
 using VkNet.Enums;
 using VkNet.Model.RequestParams;
 using VkNet.Model;
@@ -17,16 +15,15 @@ using VkNet.Model.GroupUpdate;
 using VkNet.Enums.SafetyEnums;
 using VkNet.Abstractions;
 
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+
 using VkBotFramework.Abstractions;
 using VkBotFramework.Models;
-using VkNet.Model.Keyboard;
+using VkBotFramework.Exceptions;
 
 namespace VkBotFramework
 {
@@ -41,40 +38,27 @@ namespace VkBotFramework
 		public ILogger<VkBot> Logger { get; private set; }
 		public IRegexToActionTemplateManager TemplateManager { get; private set; }
 
-		private LongPollServerResponse PollSettings { get; set; }
+		public IPeerContextManager PeerContextManager { get; private set; }
+		private LongPollServerResponse _pollSettings { get; set; }
 
 		public long GroupId { get; private set; }
 		public string GroupUrl { get; private set; }
 
-		private int LongPollTimeoutWaitSeconds { get; set; } = 25;
+		public string FilteredGroupUrl { get; private set; }
+
+		private int _longPollTimeoutWaitSeconds { get; set; } = 25;
 
 
-
-		//public VkBot(IServiceCollection serviceCollection = null)
-		//{
-		//	this.SetupDependencies(serviceCollection);
-		//}
 		public VkBot(string accessToken, string groupUrl, IServiceCollection serviceCollection = null,
-			int longPollTimeoutWaitSeconds = 25) // : this(serviceCollection)
+			int longPollTimeoutWaitSeconds = 25) 
 		{
 			this.SetupDependencies(serviceCollection);
-			this.Setup(accessToken, groupUrl, longPollTimeoutWaitSeconds);
+			this.SetupVkBot(accessToken, groupUrl, longPollTimeoutWaitSeconds);
 
 		}
 
-		//public VkBot(ILogger<VkBot> logger)
-		//{
-		//	var container = new ServiceCollection();
-
-		//	if (logger != null)
-		//	{
-		//		container.TryAddSingleton(logger);
-		//	}
-		//	this.SetupDependencies(container);
-		//}
-
 		public VkBot(string accessToken, string groupUrl, ILogger<VkBot> logger,
-			int longPollTimeoutWaitSeconds = 25) // : this(logger)
+			int longPollTimeoutWaitSeconds = 25) 
 		{
 			var container = new ServiceCollection();
 			if (logger != null)
@@ -84,7 +68,7 @@ namespace VkBotFramework
 
 			this.SetupDependencies(container);
 
-			this.Setup(accessToken, groupUrl, longPollTimeoutWaitSeconds);
+			this.SetupVkBot(accessToken, groupUrl, longPollTimeoutWaitSeconds);
 
 		}
 
@@ -100,6 +84,11 @@ namespace VkBotFramework
 				container.TryAddSingleton(typeof(IRegexToActionTemplateManager), typeof(RegexToActionTemplateManager));
 			}
 
+			if (container.All(x => x.ServiceType != typeof(IPeerContextManager)))
+			{
+				container.TryAddSingleton(typeof(IPeerContextManager), typeof(PeerContextManager));
+			}
+
 			if (container.All(x => x.ServiceType != typeof(IVkApi)))
 			{
 				var vkApiByDefault = new VkApi();
@@ -109,7 +98,7 @@ namespace VkBotFramework
 			}
 		}
 
-		private void Setup(string accessToken, string groupUrl, int longPollTimeoutWaitSeconds = 25)
+		private void SetupVkBot(string accessToken, string groupUrl, int longPollTimeoutWaitSeconds = 25)
 		{
 			if (string.IsNullOrEmpty(accessToken))
 				throw new ArgumentNullException(nameof(accessToken));
@@ -121,7 +110,7 @@ namespace VkBotFramework
 				AccessToken = accessToken
 			});
 
-			this.LongPollTimeoutWaitSeconds = longPollTimeoutWaitSeconds;
+			this._longPollTimeoutWaitSeconds = longPollTimeoutWaitSeconds;
 			this.GroupUrl = groupUrl;
 			this.GroupId = this.ResolveGroupId(groupUrl);
 
@@ -137,28 +126,43 @@ namespace VkBotFramework
 		private void SetupDependencies(IServiceCollection serviceCollection = null)
 		{
 			var container = serviceCollection ?? new ServiceCollection();
+
 			this.RegisterDefaultDependencies(container);
+
 			IServiceProvider serviceProvider = container.BuildServiceProvider();
+
 			this.Logger = serviceProvider.GetService<ILogger<VkBot>>();
+
 			this.Api = serviceProvider.GetService<IVkApi>(); //new VkApi(container);
+
 			this.TemplateManager = serviceProvider.GetService<IRegexToActionTemplateManager>();
+
+			this.PeerContextManager = serviceProvider.GetService<IPeerContextManager>();
+
 			this.Logger.LogInformation("Все зависимости подключены.");
 		}
 
 
 		private long ResolveGroupId(string groupUrl)
 		{
-			VkObject result = this.Api.Utils.ResolveScreenName(Regex.Replace(groupUrl, ".*/", ""));
-			if (result.Type != VkObjectType.Group) throw new VkApiException("GroupUrl не указывает на группу.");
+			this.FilteredGroupUrl = Regex.Replace(groupUrl, ".*/", "");
+
+			VkObject result = this.Api.Utils.ResolveScreenName(this.FilteredGroupUrl);
+
+			if (result == null || !result.Id.HasValue) throw new GroupNotResolvedException($"группа '{groupUrl}' не существует.");
+
+			if (result.Type != VkObjectType.Group) throw new GroupNotResolvedException("GroupUrl не указывает на группу.");
+
 			long groupId = result.Id.Value;
+
 			this.Logger.LogInformation($"VkBot: GroupId resolved. id: {groupId}");
 			return groupId;
 		}
 
 		private void SetupLongPoll()
 		{
-			PollSettings = Api.Groups.GetLongPollServer((ulong) this.GroupId);
-			this.Logger.LogInformation($"VkBot: LongPoolSettings received. ts: {PollSettings.Ts}");
+			_pollSettings = Api.Groups.GetLongPollServer((ulong) this.GroupId);
+			this.Logger.LogInformation($"VkBot: LongPoolSettings received. ts: {_pollSettings.Ts}");
 		}
 
 
@@ -195,7 +199,16 @@ namespace VkBotFramework
 				OnGroupUpdateReceived?.Invoke(this, new GroupUpdateReceivedEventArgs(update));
 				if (update.Type == GroupUpdateType.MessageNew)
 				{
-					OnMessageReceived?.Invoke(this, new MessageReceivedEventArgs(update.Message));
+					long peerId = update.Message.PeerId.Value;
+					PeerContext peerContext = null;
+
+					if (!this.PeerContextManager.Peers.TryGetValue(peerId, out peerContext))
+					{
+						peerContext = new PeerContext();
+						this.PeerContextManager.Peers.Add(peerId, peerContext);
+					}
+
+					OnMessageReceived?.Invoke(this, new MessageReceivedEventArgs(update.Message,peerContext));
 					this.SearchTemplatesMatchingMessageAndHandle(update.Message);
 				}
 
@@ -212,7 +225,7 @@ namespace VkBotFramework
 					{
 						if (ex is LongPollOutdateException lpoex)
 						{
-							PollSettings.Ts = lpoex.Ts;
+							_pollSettings.Ts = lpoex.Ts;
 							return default(T);
 						}
 						else if (ex is LongPollKeyExpiredException)
@@ -270,16 +283,16 @@ namespace VkBotFramework
 					BotsLongPollHistoryResponse longPollResponse = await Api.Groups.GetBotsLongPollHistoryAsync(
 						new BotsLongPollHistoryParams
 						{
-							Key = PollSettings.Key,
-							Server = PollSettings.Server,
-							Ts = PollSettings.Ts,
-							Wait = this.LongPollTimeoutWaitSeconds
+							Key = _pollSettings.Key,
+							Server = _pollSettings.Server,
+							Ts = _pollSettings.Ts,
+							Wait = this._longPollTimeoutWaitSeconds
 						}).ContinueWith(CheckLongPollResponseForErrorsAndHandle).ConfigureAwait(false);
 					if (longPollResponse == default(BotsLongPollHistoryResponse))
 						continue;
-					//Console.WriteLine(JsonConvert.SerializeObject(longPollResponse));
+
 					this.ProcessLongPollEvents(longPollResponse);
-					PollSettings.Ts = longPollResponse.Ts;
+					_pollSettings.Ts = longPollResponse.Ts;
 				}
 				catch (Exception ex)
 				{
@@ -291,7 +304,7 @@ namespace VkBotFramework
 
 		//TODO: ask your teamlead for better solution
 		public void Start()
-		{
+		{ 
 			this.StartAsync().GetAwaiter().GetResult();
 		}
 

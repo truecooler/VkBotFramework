@@ -16,8 +16,11 @@ namespace VkBotFramework.Abstractions
 		IVkApi Api { get; }
 		ILogger<VkBot> Logger { get; }
 		IRegexToActionTemplateManager TemplateManager { get; }
+		IPeerContextManager PeerContextManager { get;  }
 		long GroupId { get; }
 		string GroupUrl { get; }
+
+		string FilteredGroupUrl { get; }
 
 		Task StartAsync();
 		void Start();

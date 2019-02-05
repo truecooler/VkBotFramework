@@ -57,7 +57,7 @@ namespace MessagesWithKeyboard
 
 				sender.Api.Messages.Send(new MessagesSendParams()
 				{
-					RandomId = Environment.TickCount,
+					RandomId = Math.Abs(Environment.TickCount),
 					PeerId = eventArgs.PeerId,
 					Message = $"сколько будет {firstNum} + {secondNum}?",
 					Keyboard = keyboard.Build()
@@ -80,7 +80,7 @@ namespace MessagesWithKeyboard
 
 				sender.Api.Messages.Send(new MessagesSendParams()
 				{
-					RandomId = Environment.TickCount,
+					RandomId = Math.Abs(Environment.TickCount),
 					PeerId = eventArgs.PeerId,
 					Message = (userAnswer == peerContext.ValidAnswer)
 						? "верный ответ! держи печенюху"

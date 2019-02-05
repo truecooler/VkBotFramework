@@ -10,10 +10,11 @@
     <PackageTags>vk vkontakte vkontakte-api vkapi vk-api vk-bot vkbot вк вконтакте</PackageTags>
     <Copyright>MIT</Copyright>
     <Company>TheCooler</Company>
+    <PackageIconUrl>https://github.com/truecooler/VkBotFramework/raw/master/vkbotframework.png</PackageIconUrl>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="VkNet" Version="1.41.0-41" />
+    <PackageReference Include="VkNet" Version="1.41.0" />
   </ItemGroup>
 
 </Project>
