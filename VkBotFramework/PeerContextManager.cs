@@ -9,5 +9,7 @@ namespace VkBotFramework
     class PeerContextManager : IPeerContextManager
     {
 	    public Dictionary<long, PeerContext> Peers { get; private set; } = new Dictionary<long, PeerContext>();
-    }
+	    public Dictionary<string, dynamic> GlobalPeerContext { get; private set; } = new Dictionary<string, dynamic>();
+
+	}
 }

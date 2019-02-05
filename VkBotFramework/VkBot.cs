@@ -167,11 +167,12 @@ namespace VkBotFramework
 
 
 
-		private void SearchTemplatesMatchingMessageAndHandle(Message message)
+		private void SearchTemplatesMatchingMessageAndHandle(Message message, PeerContext peerContext)
 		{
 			var rand = new Random();
 			foreach (RegexToActionTemplate matchingTemplate in
-				this.TemplateManager.SearchTemplatesMatchingMessage(message))
+				//работа происходит с копией коллекции, поскольку оригинальная может быть изменена callback'ом
+				this.TemplateManager.SearchTemplatesMatchingMessage(message).ToList())
 			{
 				if (matchingTemplate.Callback == null)
 				{
@@ -186,7 +187,7 @@ namespace VkBotFramework
 				}
 				else
 				{
-					matchingTemplate.Callback(this, message);
+					matchingTemplate.Callback(this, new MessageReceivedEventArgs(message, peerContext));
 				}
 			}
 		}
@@ -204,12 +205,12 @@ namespace VkBotFramework
 
 					if (!this.PeerContextManager.Peers.TryGetValue(peerId, out peerContext))
 					{
-						peerContext = new PeerContext();
+						peerContext = new PeerContext(this.PeerContextManager.GlobalPeerContext);
 						this.PeerContextManager.Peers.Add(peerId, peerContext);
 					}
 
 					OnMessageReceived?.Invoke(this, new MessageReceivedEventArgs(update.Message,peerContext));
-					this.SearchTemplatesMatchingMessageAndHandle(update.Message);
+					this.SearchTemplatesMatchingMessageAndHandle(update.Message, peerContext);
 				}
 
 			}

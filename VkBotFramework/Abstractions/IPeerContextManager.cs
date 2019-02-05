@@ -9,5 +9,7 @@ namespace VkBotFramework.Abstractions
     {
 	    Dictionary<long, PeerContext> Peers { get; }
 
+		Dictionary<string, dynamic> GlobalPeerContext { get; }
+
 	}
 }

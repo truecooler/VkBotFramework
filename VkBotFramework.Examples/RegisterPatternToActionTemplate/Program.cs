@@ -6,6 +6,7 @@ using System.Text.RegularExpressions;
 using VkNet.Model.RequestParams;
 using VkBotFramework;
 using VkBotFramework.Examples;
+using VkBotFramework.Models;
 using VkNet.Enums.SafetyEnums;
 using VkNet.Model.Keyboard;
 
@@ -21,38 +22,41 @@ namespace RegisterPatternToActionTemplate
 			ExampleSettings settings = ExampleSettings.TryToLoad(logger);
 
 			VkBot bot = new VkBot(settings.AccessToken, settings.GroupUrl, logger);
-			bot.TemplateManager.Register("привет", "на привет всегда отвечаю кусь");
-			bot.TemplateManager.Register("ты кто",
-				new List<string>() {"меня зовут мишутка", "вы о ком", "не говори так", "а ты кто?"});
+			bot.TemplateManager.Register(new RegexToActionTemplate("привет", "на привет всегда отвечаю кусь"));
 
-			bot.TemplateManager.Register("^[0-9]+$", "ого, я определил, что вы прислали мне число!");
+			bot.TemplateManager.Register(
+				new RegexToActionTemplate("ты кто",
+				new List<string>() {"меня зовут мишутка", "вы о ком", "не говори так", "а ты кто?"}));
 
-			bot.TemplateManager.Register("колобок",
-				(sender, msg) =>
+			bot.TemplateManager.Register(
+				new RegexToActionTemplate("^[0-9]+$", "ого, я определил, что вы прислали мне число!"));
+
+			bot.TemplateManager.Register(new RegexToActionTemplate("колобок",
+				(sender, eventArgs) =>
 				{
 					logger.LogInformation(
-						$"кто-то написал {msg.Text}, я могу регировать на эту фразу так, как я хочу! system(\"reboot\")");
-				});
+						$"кто-то написал {eventArgs.Message.Text}, я могу регировать на эту фразу так, как я хочу! system(\"reboot\")");
+				}));
 
-			bot.TemplateManager.Register("квадр.*[0-9]+", (sender, msg) =>
+			bot.TemplateManager.Register(new RegexToActionTemplate("квадр.*[0-9]+", (sender, eventArgs) =>
 			{
 
-				logger.LogInformation($"кто-то написал '{msg.Text}', пора вычислить квадрат числа в сообщении!");
+				logger.LogInformation($"кто-то написал '{eventArgs.Message.Text}', пора вычислить квадрат числа в сообщении!");
 
-				int num = int.Parse(Regex.Match(msg.Text, "[0-9]+").Value);
+				int num = int.Parse(Regex.Match(eventArgs.Message.Text, "[0-9]+").Value);
 
 				sender.Api.Messages.Send(new MessagesSendParams()
 				{
 					RandomId = Environment.TickCount,
-					PeerId = msg.PeerId,
+					PeerId = eventArgs.Message.PeerId,
 					Message = $"квадрат числа {num} равен {num * num}"
 				});
-			});
+			}));
 
 
 			var keyboard = new KeyboardBuilder().SetOneTime()
 				.AddButton("лол", "кек", KeyboardButtonColor.Positive, "type").Build();
-			bot.TemplateManager.Register("кнопка", "лови кнопку", keyboard);
+			bot.TemplateManager.Register(new RegexToActionTemplate("кнопка", "лови кнопку", keyboard));
 			bot.Start();
 			bot.Dispose();
 			Console.ReadLine();

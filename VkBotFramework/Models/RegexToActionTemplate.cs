@@ -12,6 +12,7 @@ namespace VkBotFramework.Models
 	{
 		public RegexToActionTemplate(string incomingMessageRegexPattern, string responseMessage,
 			MessageKeyboard messageKeyboard = null,
+			long peerId = 0,
 			RegexOptions incomingMessageRegexPatternOptions = RegexOptions.IgnoreCase)
 		{
 			if (incomingMessageRegexPattern == null)
@@ -19,7 +20,7 @@ namespace VkBotFramework.Models
 			if (string.IsNullOrEmpty(responseMessage))
 				throw new ArgumentNullException(nameof(responseMessage));
 
-
+			this.PeerId = peerId;
 			this.IncomingMessageRegexPattern = incomingMessageRegexPattern;
 			this.ResponseMessages = new List<string>();
 			this.ResponseMessages.Add(responseMessage);
@@ -29,6 +30,7 @@ namespace VkBotFramework.Models
 
 
 		public RegexToActionTemplate(string incomingMessageRegexPattern, List<string> responseMessages,
+			long peerId = 0,
 			MessageKeyboard messageKeyboard = null,
 			RegexOptions incomingMessageRegexPatternOptions = RegexOptions.IgnoreCase)
 		{
@@ -39,13 +41,15 @@ namespace VkBotFramework.Models
 			if (responseMessages.Count < 1)
 				throw new ArgumentException("items count cant be less than 1", nameof(responseMessages));
 
+			this.PeerId = peerId;
 			this.IncomingMessageRegexPattern = incomingMessageRegexPattern;
 			this.ResponseMessages = responseMessages;
 			this.IncomingMessageRegexPatternOptions = incomingMessageRegexPatternOptions;
 			this.MessageKeyboard = messageKeyboard;
 		}
 
-		public RegexToActionTemplate(string incomingMessageRegexPattern, Action<VkBot, Message> callback,
+		public RegexToActionTemplate(string incomingMessageRegexPattern, Action<VkBot, MessageReceivedEventArgs> callback,
+			long peerId = 0,
 			RegexOptions incomingMessageRegexPatternOptions = RegexOptions.IgnoreCase)
 		{
 			if (incomingMessageRegexPattern == null)
@@ -53,6 +57,7 @@ namespace VkBotFramework.Models
 			if (callback == null)
 				throw new ArgumentNullException(nameof(callback));
 
+			this.PeerId = peerId;
 			this.IncomingMessageRegexPattern = incomingMessageRegexPattern;
 			this.IncomingMessageRegexPatternOptions = incomingMessageRegexPatternOptions;
 			this.Callback = callback;
@@ -65,9 +70,10 @@ namespace VkBotFramework.Models
 		}
 
 		public string IncomingMessageRegexPattern;
-		public List<string> ResponseMessages = null;
+		public List<string> ResponseMessages;
 		public RegexOptions IncomingMessageRegexPatternOptions;
-		public Action<VkBot, Message> Callback = null;
-		public MessageKeyboard MessageKeyboard = null;
+		public Action<VkBot, MessageReceivedEventArgs> Callback;
+		public MessageKeyboard MessageKeyboard;
+		public long PeerId;
 	}
 }

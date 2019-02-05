@@ -9,15 +9,17 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VkBotFramework.Tests", "VkB
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "VkBotFramework.Examples", "VkBotFramework.Examples", "{F8700DB2-46D2-4A0F-9562-53460018AD9E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExampleSettings", "VkBotFramework.Examples\ExampleSettings\ExampleSettings.csproj", "{98CAE49D-8BE3-4B2B-BBB7-6923F15FD041}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ExampleSettings", "VkBotFramework.Examples\ExampleSettings\ExampleSettings.csproj", "{98CAE49D-8BE3-4B2B-BBB7-6923F15FD041}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RegisterPatternToActionTemplate", "VkBotFramework.Examples\RegisterPatternToActionTemplate\RegisterPatternToActionTemplate.csproj", "{B9180BDB-E55C-4FFF-A48B-9F0B25BF91CD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RegisterPatternToActionTemplate", "VkBotFramework.Examples\RegisterPatternToActionTemplate\RegisterPatternToActionTemplate.csproj", "{B9180BDB-E55C-4FFF-A48B-9F0B25BF91CD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CaptureGroupUpdateEvents", "VkBotFramework.Examples\CaptureGroupUpdateEvents\CaptureGroupUpdateEvents.csproj", "{0D17BCE4-9B94-4C25-AC3D-8980A7B2C32C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CaptureGroupUpdateEvents", "VkBotFramework.Examples\CaptureGroupUpdateEvents\CaptureGroupUpdateEvents.csproj", "{0D17BCE4-9B94-4C25-AC3D-8980A7B2C32C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CaptureNewMessages", "VkBotFramework.Examples\CaptureNewMessages\CaptureNewMessages.csproj", "{3B1550BE-13D8-4B30-9377-29F638D250E6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CaptureNewMessages", "VkBotFramework.Examples\CaptureNewMessages\CaptureNewMessages.csproj", "{3B1550BE-13D8-4B30-9377-29F638D250E6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MessagesWithKeyboard", "VkBotFramework.Examples\MessagesWithKeyboard\MessagesWithKeyboard.csproj", "{6CC16AE7-BED8-41C8-90C1-76DF6DA60E61}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MessagesWithKeyboard", "VkBotFramework.Examples\MessagesWithKeyboard\MessagesWithKeyboard.csproj", "{6CC16AE7-BED8-41C8-90C1-76DF6DA60E61}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AccessToPeersContext", "VkBotFramework.Examples\AccessToPeersContext\AccessToPeersContext.csproj", "{B6F7233D-B5CF-4D90-972E-2A9FE7666662}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -53,6 +55,10 @@ Global
 		{6CC16AE7-BED8-41C8-90C1-76DF6DA60E61}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6CC16AE7-BED8-41C8-90C1-76DF6DA60E61}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6CC16AE7-BED8-41C8-90C1-76DF6DA60E61}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B6F7233D-B5CF-4D90-972E-2A9FE7666662}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B6F7233D-B5CF-4D90-972E-2A9FE7666662}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B6F7233D-B5CF-4D90-972E-2A9FE7666662}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B6F7233D-B5CF-4D90-972E-2A9FE7666662}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -63,6 +69,7 @@ Global
 		{0D17BCE4-9B94-4C25-AC3D-8980A7B2C32C} = {F8700DB2-46D2-4A0F-9562-53460018AD9E}
 		{3B1550BE-13D8-4B30-9377-29F638D250E6} = {F8700DB2-46D2-4A0F-9562-53460018AD9E}
 		{6CC16AE7-BED8-41C8-90C1-76DF6DA60E61} = {F8700DB2-46D2-4A0F-9562-53460018AD9E}
+		{B6F7233D-B5CF-4D90-972E-2A9FE7666662} = {F8700DB2-46D2-4A0F-9562-53460018AD9E}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C481B7A3-63BE-4552-A982-B42230845DAA}
