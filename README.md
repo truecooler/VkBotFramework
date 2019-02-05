@@ -4,6 +4,22 @@
 Удобная, маленькая и кроссплатформенная библиотека для создания ботов в соц. сети ВКонтакте
 ## Getting Started
 Эти инструкция позволит вам просто и быстро сделать своего бота для вк.
+
+### Install
+Установите Nuget пакет в ваш проект:
+**Package Manager**
+``` powershell
+PM> Install-Package VkBotFramework
+```
+**.NET CLI**
+``` bash
+> dotnet add package VkBotFramework
+```
+**Visual Studio Nuget Manager**
+```
+Проект -> Свойства -> Управление пакетами Nuget -> Обзор -> Поиск -> VkBotFramework -> Установить
+```
+
 ### Prerequisites
 На данный момент можно создавать только групповых ботов, а значит вам потребуется AccessToken и GroupUrl для взаимодействия с группой, а так же выставить необхдимые права доступа боту.
 
