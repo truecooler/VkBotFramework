@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace VkBotFramework.Exceptions
 {
-    class VkBotException : Exception
+	class VkBotException : Exception
 	{
 		public VkBotException()
 		{

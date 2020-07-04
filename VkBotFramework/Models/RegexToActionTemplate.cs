@@ -1,15 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Text.RegularExpressions;
-using VkNet.Model;
 using VkNet.Model.Keyboard;
 
 namespace VkBotFramework.Models
 {
-
 	public class RegexToActionTemplate
 	{
+		public Action<VkBot, MessageReceivedEventArgs> Callback;
+
+		public string IncomingMessageRegexPattern;
+		public RegexOptions IncomingMessageRegexPatternOptions;
+		public MessageKeyboard MessageKeyboard;
+		public long PeerId;
+		public List<string> ResponseMessages;
+
 		public RegexToActionTemplate(string incomingMessageRegexPattern, string responseMessage,
 			MessageKeyboard messageKeyboard = null,
 			long peerId = 0,
@@ -48,7 +53,8 @@ namespace VkBotFramework.Models
 			this.MessageKeyboard = messageKeyboard;
 		}
 
-		public RegexToActionTemplate(string incomingMessageRegexPattern, Action<VkBot, MessageReceivedEventArgs> callback,
+		public RegexToActionTemplate(string incomingMessageRegexPattern,
+			Action<VkBot, MessageReceivedEventArgs> callback,
 			long peerId = 0,
 			RegexOptions incomingMessageRegexPatternOptions = RegexOptions.IgnoreCase)
 		{
@@ -68,12 +74,5 @@ namespace VkBotFramework.Models
 			var rand = new Random();
 			return this.ResponseMessages[rand.Next(0, this.ResponseMessages.Count)];
 		}
-
-		public string IncomingMessageRegexPattern;
-		public List<string> ResponseMessages;
-		public RegexOptions IncomingMessageRegexPatternOptions;
-		public Action<VkBot, MessageReceivedEventArgs> Callback;
-		public MessageKeyboard MessageKeyboard;
-		public long PeerId;
 	}
 }

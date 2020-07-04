@@ -14,7 +14,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="VkNet" Version="1.41.0" />
+    <PackageReference Include="VkNet" Version="1.53.0" />
   </ItemGroup>
 
 </Project>

@@ -1,5 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
-using System;
+﻿using System;
+using Microsoft.Extensions.Logging;
 using VkBotFramework;
 using VkBotFramework.Examples;
 using VkBotFramework.Models;
@@ -19,7 +19,7 @@ namespace AccessToPeerContext
 
 			VkBot bot = new VkBot(settings.AccessToken, settings.GroupUrl, logger);
 
-			var keyboard = new KeyboardBuilder().SetOneTime().AddButton("тык", "").AddButton("тыдыщ","").Build();
+			var keyboard = new KeyboardBuilder().SetOneTime().AddButton("тык", "").AddButton("тыдыщ", "").Build();
 
 			bot.TemplateManager.Register(new RegexToActionTemplate("тык", (sender, eventArgs) =>
 				{
@@ -36,7 +36,6 @@ namespace AccessToPeerContext
 						Message = $"тык номер {context.Vars["тыки"]++}",
 						RandomId = Math.Abs(Environment.TickCount)
 					});
-
 				}
 			));
 
@@ -57,7 +56,6 @@ namespace AccessToPeerContext
 
 			bot.Start();
 			bot.Dispose();
-
 		}
 	}
 }

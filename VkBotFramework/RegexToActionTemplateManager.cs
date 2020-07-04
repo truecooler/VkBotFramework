@@ -1,20 +1,17 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
 using VkBotFramework.Abstractions;
 using VkBotFramework.Models;
 using VkNet.Model;
-using VkNet.Model.Keyboard;
 
 namespace VkBotFramework
 {
 	public class RegexToActionTemplateManager : IRegexToActionTemplateManager
 	{
-		private object _regexToActionTemplatesLock = new object();
 		private List<RegexToActionTemplate> _regexToActionTemplates = new List<RegexToActionTemplate>();
+		private object _regexToActionTemplatesLock = new object();
 
 		//public void Register(string incomingMessageRegexPattern, string responseMessage,
 		//	MessageKeyboard messageKeyboard = null,
@@ -46,6 +43,7 @@ namespace VkBotFramework
 				_regexToActionTemplates.Remove(template);
 			}
 		}
+
 		public void Unregister(string incomingMessageRegexPattern, long peerId = 0)
 		{
 			lock (_regexToActionTemplatesLock)
@@ -66,7 +64,6 @@ namespace VkBotFramework
 			{
 				_regexToActionTemplates.Add(template);
 			}
-
 		}
 
 		public IEnumerable<RegexToActionTemplate> SearchTemplatesMatchingMessage(Message message)

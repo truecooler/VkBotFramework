@@ -1,14 +1,13 @@
 ﻿using System;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
-using VkNet.Model.RequestParams;
+using Microsoft.Extensions.Logging;
 using VkBotFramework;
 using VkBotFramework.Examples;
 using VkBotFramework.Models;
 using VkNet.Enums.SafetyEnums;
 using VkNet.Model.Keyboard;
+using VkNet.Model.RequestParams;
 
 namespace RegisterPatternToActionTemplate
 {
@@ -26,7 +25,7 @@ namespace RegisterPatternToActionTemplate
 
 			bot.TemplateManager.Register(
 				new RegexToActionTemplate("ты кто",
-				new List<string>() {"меня зовут мишутка", "вы о ком", "не говори так", "а ты кто?"}));
+					new List<string>() {"меня зовут мишутка", "вы о ком", "не говори так", "а ты кто?"}));
 
 			bot.TemplateManager.Register(
 				new RegexToActionTemplate("^[0-9]+$", "ого, я определил, что вы прислали мне число!"));
@@ -40,8 +39,8 @@ namespace RegisterPatternToActionTemplate
 
 			bot.TemplateManager.Register(new RegexToActionTemplate("квадр.*[0-9]+", (sender, eventArgs) =>
 			{
-
-				logger.LogInformation($"кто-то написал '{eventArgs.Message.Text}', пора вычислить квадрат числа в сообщении!");
+				logger.LogInformation(
+					$"кто-то написал '{eventArgs.Message.Text}', пора вычислить квадрат числа в сообщении!");
 
 				int num = int.Parse(Regex.Match(eventArgs.Message.Text, "[0-9]+").Value);
 

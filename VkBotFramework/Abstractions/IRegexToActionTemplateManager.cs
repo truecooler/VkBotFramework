@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Text.RegularExpressions;
+﻿using System.Collections.Generic;
 using VkBotFramework.Models;
 using VkNet.Model;
-using VkNet.Model.Keyboard;
 
 namespace VkBotFramework.Abstractions
 {
@@ -25,10 +21,5 @@ namespace VkBotFramework.Abstractions
 		void Unregister(RegexToActionTemplate template);
 		void Unregister(string incomingMessageRegexPattern, long peerId = 0);
 		void Register(RegexToActionTemplate template);
-
-
-
-
-
 	}
 }

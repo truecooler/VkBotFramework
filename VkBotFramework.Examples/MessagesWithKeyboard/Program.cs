@@ -1,22 +1,12 @@
-﻿
-using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System;
 using System.Text.RegularExpressions;
-
 using Microsoft.Extensions.Logging;
-
 using VkBotFramework;
 using VkBotFramework.Examples;
 using VkBotFramework.Models;
-
 using VkNet.Enums.SafetyEnums;
-using VkNet.Model;
 using VkNet.Model.Keyboard;
 using VkNet.Model.RequestParams;
-using VkNet.Utils;
-
-
 
 namespace MessagesWithKeyboard
 {
@@ -35,7 +25,7 @@ namespace MessagesWithKeyboard
 				.AddButton("+матеша", "", KeyboardButtonColor.Positive)
 				.AddButton("-матеша", "", KeyboardButtonColor.Negative);
 
-			sender.TemplateManager.Unregister(MateshaNumberCommand,args.Message.PeerId.Value);
+			sender.TemplateManager.Unregister(MateshaNumberCommand, args.Message.PeerId.Value);
 			args.PeerContext.Vars.Remove("validAnswer");
 			sender.Api.Messages.Send(new MessagesSendParams()
 			{
@@ -46,7 +36,6 @@ namespace MessagesWithKeyboard
 					: $"ответ {userAnswer} невернен! верный ответ был: {validAnswer}, попробуйте еще раз",
 				Keyboard = keyboard.Build()
 			});
-
 		}
 
 		static void MateshaHandler(VkBot sender, MessageReceivedEventArgs args)
@@ -59,14 +48,14 @@ namespace MessagesWithKeyboard
 			var firstNum = rand.Next(1, 100);
 			var secondNum = rand.Next(1, 100);
 			var validAnswer = firstNum + secondNum;
-			
+
 			//устанавливаем правильный ответ в контекст диалога
 			args.PeerContext.Vars["validAnswer"] = validAnswer;
 
 			//регистрируем новый обработчик для этого диалога, который будет чувствителен к числам
 			sender.TemplateManager.Register(
 				new RegexToActionTemplate(MateshaNumberCommand, MateshaNumberHandler, peerId: message.PeerId.Value)
-				);
+			);
 
 			//рисуем кнопочки
 			int buttonsCount = 10;
@@ -76,11 +65,11 @@ namespace MessagesWithKeyboard
 			for (int i = 0; i < buttonsCount; i++)
 			{
 				if (i == validButtonIndex)
-					keyboard.AddButton((validAnswer).ToString(), "",KeyboardButtonColor.Primary);
+					keyboard.AddButton((validAnswer).ToString(), "", KeyboardButtonColor.Primary);
 				else
 					keyboard.AddButton(rand.Next(200).ToString(), "", KeyboardButtonColor.Primary);
 
-				if ((i+1) % maxButtonsCountInLine == 0)
+				if ((i + 1) % maxButtonsCountInLine == 0)
 					keyboard.AddLine();
 			}
 
@@ -90,7 +79,6 @@ namespace MessagesWithKeyboard
 				PeerId = args.Message.PeerId,
 				Message = $"сколько будет {firstNum} + {secondNum}?",
 				Keyboard = keyboard.Build()
-
 			});
 		}
 
@@ -102,11 +90,11 @@ namespace MessagesWithKeyboard
 			ExampleSettings settings = ExampleSettings.TryToLoad(logger);
 
 			VkBot bot = new VkBot(settings.AccessToken, settings.GroupUrl, logger);
-			
 
 
 			//регистрируем текстовый ответ на "+матеша"
-			bot.TemplateManager.Register(new RegexToActionTemplate(MateshaSubscribeCommand, "ну окей, вот тебе матеша"));
+			bot.TemplateManager.Register(new RegexToActionTemplate(MateshaSubscribeCommand,
+				"ну окей, вот тебе матеша"));
 
 			//регистрируем обработчик-функцию на "+матеша"
 			bot.TemplateManager.Register(new RegexToActionTemplate(MateshaSubscribeCommand, MateshaHandler));

@@ -1,31 +1,29 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using NUnit;
-using NUnit.Framework;
-using Microsoft.Extensions.DependencyInjection;
-using VkNet;
-using VkNet.Abstractions;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Moq;
+using NUnit.Framework;
+using VkNet.Abstractions;
 using VkNet.Model;
-using VkNet.Utils;
 
 namespace VkBotFramework.Tests
 {
 	[TestFixture]
-    public class VkBotTest
-    {
-
+	public class VkBotTest
+	{
 		[SetUp]
 		public void TestSetup()
 		{
-			
 		}
 
-		ServiceCollection MockResolveScreenNameApi(VkObject resolveScreenNameFakeResponse=null)
+
+		[TearDown]
+		public void TestCleanup()
 		{
-			if (resolveScreenNameFakeResponse==null)
-				resolveScreenNameFakeResponse = new VkObject() { Type = VkNet.Enums.VkObjectType.Group, Id = 123456 };
+		}
+
+		ServiceCollection MockResolveScreenNameApi(VkObject resolveScreenNameFakeResponse = null)
+		{
+			if (resolveScreenNameFakeResponse == null)
+				resolveScreenNameFakeResponse = new VkObject() {Type = VkNet.Enums.VkObjectType.Group, Id = 123456};
 
 			var di = new ServiceCollection();
 
@@ -45,21 +43,19 @@ namespace VkBotFramework.Tests
 		[Test]
 		public void VkBotCtor_PutFakeGroupId_ResolvedGroupIdShouldBeAsFake()
 		{
-			
 			long expectedGroupId = 111222;
-			var resolveScreenNameFakeResponse = new VkObject() { Type = VkNet.Enums.VkObjectType.Group, Id = expectedGroupId };
+			var resolveScreenNameFakeResponse = new VkObject()
+				{Type = VkNet.Enums.VkObjectType.Group, Id = expectedGroupId};
 			var di = MockResolveScreenNameApi(resolveScreenNameFakeResponse);
 
-			var bot = new VkBot("test","test",di);
+			var bot = new VkBot("test", "test", di);
 
 			Assert.AreEqual(bot.GroupId, expectedGroupId);
-
 		}
 
 		[Test]
 		public void VkBotCtor_PutFilteredGroupUrl_GroupUrlShouldBeAsFiltered()
 		{
-
 			var di = MockResolveScreenNameApi();
 			string expectedGroupUrl = "someGroupUrl";
 
@@ -74,7 +70,8 @@ namespace VkBotFramework.Tests
 		[TestCase("https://vk.com/folder/url/someGroupUrl", "someGroupUrl")]
 		[TestCase("///////someGroupUrl", "someGroupUrl")]
 		[TestCase("9999/someGroupUrl", "someGroupUrl")]
-		public void VkBotCtor_PutUnfilteredGroupUrl_GroupUrlShouldBeFiltered(string unfilteredGroupUrl, string expectedGroupUrl)
+		public void VkBotCtor_PutUnfilteredGroupUrl_GroupUrlShouldBeFiltered(string unfilteredGroupUrl,
+			string expectedGroupUrl)
 		{
 			var di = MockResolveScreenNameApi();
 
@@ -82,13 +79,5 @@ namespace VkBotFramework.Tests
 
 			Assert.AreEqual(bot.FilteredGroupUrl, expectedGroupUrl);
 		}
-
-
-		[TearDown]
-		public void TestCleanup()
-		{
-
-		}
-
 	}
 }

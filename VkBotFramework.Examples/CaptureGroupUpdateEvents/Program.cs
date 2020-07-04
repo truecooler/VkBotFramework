@@ -1,13 +1,10 @@
-﻿using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Logging.Configuration;
-using VkBotFramework.Examples;
-using VkNet.Enums.SafetyEnums;
-using VkBotFramework.Models;
-using VkNet.Model.RequestParams;
+﻿using System;
+using Microsoft.Extensions.Logging;
 using VkBotFramework;
+using VkBotFramework.Examples;
+using VkBotFramework.Models;
+using VkNet.Enums.SafetyEnums;
+using VkNet.Model.RequestParams;
 
 namespace CaptureGroupUpdateEvents
 {

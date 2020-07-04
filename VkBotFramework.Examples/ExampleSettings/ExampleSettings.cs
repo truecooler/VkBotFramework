@@ -1,15 +1,25 @@
 ﻿using System;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
-
 
 namespace VkBotFramework.Examples
 {
 	public class ExampleSettings
 	{
+		public string AccessToken;
+		public string GroupUrl;
+
+		public static string Filename
+		{
+			get
+			{
+				return Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)
+				       + @"/../../../../ExampleSettings/bin/ExampleSettings.json";
+			}
+		}
+
 		public static void CreateDefaults()
 		{
 			ExampleSettings settings = new ExampleSettings();
@@ -45,17 +55,5 @@ namespace VkBotFramework.Examples
 			_Logger.LogInformation("Настройки загружены.");
 			return settings;
 		}
-
-		public static string Filename
-		{
-			get
-			{
-				return Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)
-				       + @"/../../../../ExampleSettings/bin/ExampleSettings.json";
-			}
-		}
-
-		public string AccessToken;
-		public string GroupUrl;
 	}
 }

@@ -1,6 +1,6 @@
-﻿using Microsoft.Extensions.Logging;
-using System;
+﻿using System;
 using System.Linq;
+using Microsoft.Extensions.Logging;
 using VkBotFramework;
 using VkBotFramework.Examples;
 using VkBotFramework.Models;
@@ -12,7 +12,6 @@ namespace CaptureNewMessages
 	{
 		static void NewMessageHandler(object sender, MessageReceivedEventArgs eventArgs)
 		{
-
 			VkBot instanse = sender as VkBot;
 			var peerId = eventArgs.Message.PeerId;
 			var fromId = eventArgs.Message.FromId;
