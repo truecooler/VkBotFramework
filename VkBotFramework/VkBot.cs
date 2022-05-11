@@ -238,9 +238,10 @@ namespace VkBotFramework
 			{
 				OnGroupUpdateReceived?.Invoke(this, new GroupUpdateReceivedEventArgs(update,
 					this.PeerContextManager.GlobalVars));
+
 				if (update.Type == GroupUpdateType.MessageNew)
 				{
-					long peerId = update.Message.PeerId.Value;
+					long peerId = update.MessageNew.Message.PeerId.Value;
 					PeerContext peerContext = null;
 
 					if (!this.PeerContextManager.Peers.TryGetValue(peerId, out peerContext))
@@ -249,8 +250,8 @@ namespace VkBotFramework
 						this.PeerContextManager.Peers.Add(peerId, peerContext);
 					}
 
-					OnMessageReceived?.Invoke(this, new MessageReceivedEventArgs(update.Message, peerContext));
-					this.SearchTemplatesMatchingMessageAndHandle(update.Message, peerContext);
+					OnMessageReceived?.Invoke(this, new MessageReceivedEventArgs(update.MessageNew.Message, peerContext));
+					this.SearchTemplatesMatchingMessageAndHandle(update.MessageNew.Message, peerContext);
 				}
 			}
 		}
