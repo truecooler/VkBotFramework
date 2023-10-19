@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
     <Authors>Mikhail Petrov</Authors>
     <Description>Удобная, маленькая и кроссплатформенная библиотека для создания ботов в соц. сети ВКонтакте</Description>
     <PackageLicenseUrl>https://github.com/truecooler/VkBotFramework/blob/master/LICENSE</PackageLicenseUrl>
@@ -14,7 +14,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="VkNet" Version="1.53.0" />
+    <PackageReference Include="VkNet" Version="1.76.0" />
   </ItemGroup>
 
 </Project>

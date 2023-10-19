@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using VkNet.Model.GroupUpdate;
+using VkNet.Model;
 
 namespace VkBotFramework.Models
 {

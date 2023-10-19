@@ -14,11 +14,9 @@ using VkBotFramework.Models;
 using VkNet;
 using VkNet.Abstractions;
 using VkNet.Enums;
-using VkNet.Enums.SafetyEnums;
+using VkNet.Enums.StringEnums;
 using VkNet.Exception;
 using VkNet.Model;
-using VkNet.Model.GroupUpdate;
-using VkNet.Model.RequestParams;
 
 namespace VkBotFramework
 {
@@ -239,9 +237,10 @@ namespace VkBotFramework
 				OnGroupUpdateReceived?.Invoke(this, new GroupUpdateReceivedEventArgs(update,
 					this.PeerContextManager.GlobalVars));
 
-				if (update.Type == GroupUpdateType.MessageNew)
+				if (update.Type.Value == GroupUpdateType.MessageNew)
 				{
-					long peerId = update.MessageNew.Message.PeerId.Value;
+					var messageNewUpdate = update.Instance as MessageNew;
+					long peerId = messageNewUpdate.Message.PeerId.Value;
 					PeerContext peerContext = null;
 
 					if (!this.PeerContextManager.Peers.TryGetValue(peerId, out peerContext))
@@ -250,8 +249,8 @@ namespace VkBotFramework
 						this.PeerContextManager.Peers.Add(peerId, peerContext);
 					}
 
-					OnMessageReceived?.Invoke(this, new MessageReceivedEventArgs(update.MessageNew.Message, peerContext));
-					this.SearchTemplatesMatchingMessageAndHandle(update.MessageNew.Message, peerContext);
+					OnMessageReceived?.Invoke(this, new MessageReceivedEventArgs(messageNewUpdate.Message, peerContext));
+					this.SearchTemplatesMatchingMessageAndHandle(messageNewUpdate.Message, peerContext);
 				}
 			}
 		}
